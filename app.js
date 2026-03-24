@@ -1,24 +1,26 @@
-console.log("DISPARANDO FETCH...");
+async function loginMotorista() {
 
-try {
+    console.log("DISPARANDO FETCH...");
 
-    const res = await fetch(URL_LOGIN_MOTORISTA, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            acao: "login",
-            usuario,
-            senha
-        })
-    });
+    try {
+        const res = await fetch(URL_LOGIN_MOTORISTA, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                acao: "login",
+                usuario,
+                senha
+            })
+        });
 
-    console.log("STATUS:", res.status);
+        console.log("STATUS:", res.status);
 
-    const text = await res.text();
-    console.log("RESPOSTA:", text);
+        const text = await res.text();
+        console.log("RESPOSTA:", text);
 
-} catch (e) {
-    console.error("ERRO FETCH:", e);
+    } catch (e) {
+        console.error("ERRO:", e);
+    }
 }
