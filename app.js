@@ -10,7 +10,7 @@ let ultimaPos = null;
 let enviando = false;
 
 // ================= INIT =================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function () {
 
 ```
 console.log("✅ App carregado");
@@ -38,25 +38,27 @@ if (btnCorrida) {
 async function loginMotorista() {
 
 ```
-console.log("🔵 Clique motorista");
+console.log("🔵 Login motorista clicado");
 
 const usuario = document.getElementById("usuario").value;
 const senha = document.getElementById("senha").value;
 
-console.log("Tentando login:", usuario, senha);
-
 try {
+
+    const payload = {
+        acao: "login",
+        usuario: usuario,
+        senha: senha
+    };
+
+    console.log("Enviando:", payload);
 
     const res = await fetch(URL_LOGIN_MOTORISTA, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-            acao: "login",
-            usuario,
-            senha
-        })
+        body: JSON.stringify(payload)
     });
 
     console.log("STATUS:", res.status);
@@ -81,22 +83,26 @@ try {
 async function loginPassageiro() {
 
 ```
-console.log("🟢 Clique passageiro");
+console.log("🟢 Login passageiro clicado");
 
 const usuario = document.getElementById("usuario").value;
 const senha = document.getElementById("senha").value;
 
 try {
 
+    const payload = {
+        usuario: usuario,
+        senha: senha
+    };
+
+    console.log("Enviando:", payload);
+
     const res = await fetch(URL_LOGIN_PASSAGEIRO, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-            usuario,
-            senha
-        })
+        body: JSON.stringify(payload)
     });
 
     console.log("STATUS:", res.status);
@@ -124,13 +130,13 @@ if (!navigator.geolocation) {
     return;
 }
 
-console.log("📡 Iniciando GPS...");
+console.log("📡 Iniciando GPS");
 
 navigator.geolocation.watchPosition(
-    (pos) => {
+    function (pos) {
         ultimaPos = pos;
     },
-    (err) => {
+    function (err) {
         console.error("Erro GPS:", err);
     },
     {
@@ -140,40 +146,48 @@ navigator.geolocation.watchPosition(
     }
 );
 
-loopEnvioGPS();
+iniciarLoopGPS();
 ```
 
 }
 
 // ================= LOOP GPS =================
-function loopEnvioGPS() {
+function iniciarLoopGPS() {
 
 ```
 if (enviando) return;
 
 enviando = true;
 
-async function enviarLoop() {
+function loop() {
 
     if (ultimaPos) {
 
-        const { latitude, longitude, speed } = ultimaPos.coords;
+        const latitude = ultimaPos.coords.latitude;
+        const longitude = ultimaPos.coords.longitude;
+        const speed = ultimaPos.coords.speed || 0;
 
-        console.log("📍 Enviando GPS:", latitude, longitude);
+        const url =
+            URL_GPS +
+            "?token=" + token +
+            "&lat=" + latitude +
+            "&lon=" + longitude +
+            "&speed=" + speed +
+            "&ping=1";
 
-        try {
-            await fetch(`${URL_GPS}?token=${token}&lat=${latitude}&lon=${longitude}&speed=${speed || 0}&ping=1`);
-        } catch (e) {
+        console.log("📍 URL GPS:", url);
+
+        fetch(url).catch(function (e) {
             console.error("Erro envio GPS:", e);
-        }
+        });
 
         document.getElementById("statusGPS").innerText = "📍 GPS enviado";
     }
 
-    setTimeout(enviarLoop, 10000);
+    setTimeout(loop, 10000);
 }
 
-enviarLoop();
+loop();
 ```
 
 }
@@ -182,7 +196,7 @@ enviarLoop();
 async function solicitarCorrida() {
 
 ```
-console.log("🚕 Solicitando corrida");
+console.log("🚕 Solicitar corrida");
 
 const origem = document.getElementById("origem").value;
 const destino = document.getElementById("destino").value;
@@ -194,18 +208,22 @@ if (valor < 10) valor = 10;
 
 try {
 
+    const payload = {
+        nome: "Usuário",
+        origem: origem,
+        destino: destino,
+        distancia_km: distancia,
+        valor_total: valor
+    };
+
+    console.log("Enviando corrida:", payload);
+
     const res = await fetch(URL_CORRIDA, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-            nome: "Usuário",
-            origem,
-            destino,
-            distancia_km: distancia,
-            valor_total: valor
-        })
+        body: JSON.stringify(payload)
     });
 
     console.log("STATUS CORRIDA:", res.status);
