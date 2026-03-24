@@ -1,16 +1,24 @@
-console.log("JS CARREGOU");
+console.log("DISPARANDO FETCH...");
 
-document.addEventListener("DOMContentLoaded", () => {
+try {
 
-    console.log("DOM OK");
-
-    const btn = document.getElementById("btnMotorista");
-
-    console.log("Botão encontrado:", btn);
-
-    btn.addEventListener("click", () => {
-        console.log("🔥 CLIQUE FUNCIONOU 🔥");
-        alert("Botão funcionando");
+    const res = await fetch(URL_LOGIN_MOTORISTA, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            acao: "login",
+            usuario,
+            senha
+        })
     });
 
-});
+    console.log("STATUS:", res.status);
+
+    const text = await res.text();
+    console.log("RESPOSTA:", text);
+
+} catch (e) {
+    console.error("ERRO FETCH:", e);
+}
