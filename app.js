@@ -82,7 +82,7 @@ try {
 // ================= LOGIN PASSAGEIRO =================
 async function loginPassageiro() {
 
-```
+
 console.log("🟢 Login passageiro clicado");
 
 const usuario = document.getElementById("usuario").value;
@@ -124,7 +124,7 @@ try {
 // ================= GPS =================
 function iniciarGPS() {
 
-```
+
 if (!navigator.geolocation) {
     alert("GPS não suportado");
     return;
