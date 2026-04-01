@@ -12,7 +12,7 @@ let enviando = false;
 // ================= INIT =================
 document.addEventListener("DOMContentLoaded", function () {
 
-```
+
 console.log("✅ App carregado");
 
 const btnMotorista = document.getElementById("btnMotorista");
@@ -30,14 +30,14 @@ if (btnPassageiro) {
 if (btnCorrida) {
     btnCorrida.addEventListener("click", solicitarCorrida);
 }
-```
+
 
 });
 
 // ================= LOGIN MOTORISTA =================
 async function loginMotorista() {
 
-```
+
 console.log("🔵 Login motorista clicado");
 
 const usuario = document.getElementById("usuario").value;
@@ -75,7 +75,7 @@ try {
     console.error("❌ ERRO LOGIN MOTORISTA:", e);
     alert("Erro ao conectar com servidor");
 }
-```
+
 
 }
 
@@ -117,7 +117,7 @@ try {
     console.error("❌ ERRO LOGIN PASSAGEIRO:", e);
     alert("Erro ao conectar com servidor");
 }
-```
+
 
 }
 
@@ -147,14 +147,14 @@ navigator.geolocation.watchPosition(
 );
 
 iniciarLoopGPS();
-```
+
 
 }
 
 // ================= LOOP GPS =================
 function iniciarLoopGPS() {
 
-```
+
 if (enviando) return;
 
 enviando = true;
@@ -188,14 +188,14 @@ function loop() {
 }
 
 loop();
-```
+
 
 }
 
 // ================= CORRIDA =================
 async function solicitarCorrida() {
 
-```
+
 console.log("🚕 Solicitar corrida");
 
 const origem = document.getElementById("origem").value;
@@ -234,6 +234,6 @@ try {
     console.error("❌ ERRO CORRIDA:", e);
     alert("Erro ao solicitar corrida");
 }
-```
+
 
 }
