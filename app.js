@@ -9,231 +9,216 @@ let token = "MOTO-TESTE";
 let ultimaPos = null;
 let enviando = false;
 
+// 🔥 MAPA
+let map = null;
+let markerMotorista = null;
+
 // ================= INIT =================
 document.addEventListener("DOMContentLoaded", function () {
 
+    console.log("✅ App carregado");
 
-console.log("✅ App carregado");
+    const btnMotorista = document.getElementById("btnMotorista");
+    const btnPassageiro = document.getElementById("btnPassageiro");
+    const btnCorrida = document.getElementById("btnCorrida");
 
-const btnMotorista = document.getElementById("btnMotorista");
-const btnPassageiro = document.getElementById("btnPassageiro");
-const btnCorrida = document.getElementById("btnCorrida");
-
-if (btnMotorista) {
-    btnMotorista.addEventListener("click", loginMotorista);
-}
-
-if (btnPassageiro) {
-    btnPassageiro.addEventListener("click", loginPassageiro);
-}
-
-if (btnCorrida) {
-    btnCorrida.addEventListener("click", solicitarCorrida);
-}
-
-
+    if (btnMotorista) btnMotorista.addEventListener("click", loginMotorista);
+    if (btnPassageiro) btnPassageiro.addEventListener("click", loginPassageiro);
+    if (btnCorrida) btnCorrida.addEventListener("click", solicitarCorrida);
 });
 
 // ================= LOGIN MOTORISTA =================
 async function loginMotorista() {
 
+    console.log("🔵 Login motorista clicado");
 
-console.log("🔵 Login motorista clicado");
+    const usuario = document.getElementById("usuario").value;
+    const senha = document.getElementById("senha").value;
 
-const usuario = document.getElementById("usuario").value;
-const senha = document.getElementById("senha").value;
+    try {
 
-try {
+        const payload = {
+            acao: "login",
+            usuario,
+            senha
+        };
 
-    const payload = {
-        acao: "login",
-        usuario: usuario,
-        senha: senha
-    };
+        const res = await fetch(URL_LOGIN_MOTORISTA, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
 
-    console.log("Enviando:", payload);
+        const text = await res.text();
+        console.log("RESPOSTA:", text);
 
-    const res = await fetch(URL_LOGIN_MOTORISTA, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-    });
+        document.getElementById("login").classList.add("hidden");
+        document.getElementById("motorista").classList.remove("hidden");
 
-    console.log("STATUS:", res.status);
+        iniciarMapa();   // 🔥 inicia mapa
+        iniciarGPS();    // 🔥 inicia GPS
 
-    const text = await res.text();
-    console.log("RESPOSTA:", text);
-
-    document.getElementById("login").classList.add("hidden");
-    document.getElementById("motorista").classList.remove("hidden");
-
-    iniciarGPS();
-
-} catch (e) {
-    console.error("❌ ERRO LOGIN MOTORISTA:", e);
-    alert("Erro ao conectar com servidor");
-}
-
-
+    } catch (e) {
+        console.error("❌ ERRO LOGIN MOTORISTA:", e);
+        alert("Erro ao conectar com servidor");
+    }
 }
 
 // ================= LOGIN PASSAGEIRO =================
 async function loginPassageiro() {
 
+    console.log("🟢 Login passageiro clicado");
 
-console.log("🟢 Login passageiro clicado");
+    const usuario = document.getElementById("usuario").value;
+    const senha = document.getElementById("senha").value;
 
-const usuario = document.getElementById("usuario").value;
-const senha = document.getElementById("senha").value;
+    try {
 
-try {
+        const payload = { usuario, senha };
 
-    const payload = {
-        usuario: usuario,
-        senha: senha
-    };
+        const res = await fetch(URL_LOGIN_PASSAGEIRO, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
 
-    console.log("Enviando:", payload);
+        const text = await res.text();
+        console.log("RESPOSTA:", text);
 
-    const res = await fetch(URL_LOGIN_PASSAGEIRO, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-    });
+        document.getElementById("login").classList.add("hidden");
+        document.getElementById("passageiro").classList.remove("hidden");
 
-    console.log("STATUS:", res.status);
-
-    const text = await res.text();
-    console.log("RESPOSTA:", text);
-
-    document.getElementById("login").classList.add("hidden");
-    document.getElementById("passageiro").classList.remove("hidden");
-
-} catch (e) {
-    console.error("❌ ERRO LOGIN PASSAGEIRO:", e);
-    alert("Erro ao conectar com servidor");
+    } catch (e) {
+        console.error("❌ ERRO LOGIN PASSAGEIRO:", e);
+        alert("Erro ao conectar com servidor");
+    }
 }
 
+// ================= MAPA =================
+function iniciarMapa() {
 
+    mapboxgl.accessToken = 'pk.eyJ1IjoicmFmYWVsZGFuZGEiLCJhIjoiY21tM3V6aHQ3MDR1dTJxcHdiNnhpaHd0ayJ9.w-fjeHmzlyVes75Rg4pJuQ';
+
+    map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [-51.23, -30.03],
+        zoom: 12
+    });
+
+    markerMotorista = new mapboxgl.Marker({ color: '#2ea6ff' })
+        .setLngLat([-51.23, -30.03])
+        .addTo(map);
 }
 
 // ================= GPS =================
 function iniciarGPS() {
 
-
-if (!navigator.geolocation) {
-    alert("GPS não suportado");
-    return;
-}
-
-console.log("📡 Iniciando GPS");
-
-navigator.geolocation.watchPosition(
-    function (pos) {
-        ultimaPos = pos;
-    },
-    function (err) {
-        console.error("Erro GPS:", err);
-    },
-    {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 20000
+    if (!navigator.geolocation) {
+        alert("GPS não suportado");
+        return;
     }
-);
 
-iniciarLoopGPS();
+    console.log("📡 Iniciando GPS");
 
+    navigator.geolocation.watchPosition(
+        function (pos) {
 
+            ultimaPos = pos;
+
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+
+            // 🔥 atualiza mapa
+            if (markerMotorista) markerMotorista.setLngLat([lon, lat]);
+            if (map) map.setCenter([lon, lat]);
+        },
+        function (err) {
+            console.error("Erro GPS:", err);
+        },
+        {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 20000
+        }
+    );
+
+    iniciarLoopGPS();
 }
 
 // ================= LOOP GPS =================
 function iniciarLoopGPS() {
 
+    if (enviando) return;
 
-if (enviando) return;
+    enviando = true;
 
-enviando = true;
+    function loop() {
 
-function loop() {
+        if (ultimaPos) {
 
-    if (ultimaPos) {
+            const latitude = ultimaPos.coords.latitude;
+            const longitude = ultimaPos.coords.longitude;
+            const speed = ultimaPos.coords.speed || 0;
 
-        const latitude = ultimaPos.coords.latitude;
-        const longitude = ultimaPos.coords.longitude;
-        const speed = ultimaPos.coords.speed || 0;
+            const url =
+                URL_GPS +
+                "?token=" + token +
+                "&lat=" + latitude +
+                "&lon=" + longitude +
+                "&speed=" + speed +
+                "&ping=1";
 
-        const url =
-            URL_GPS +
-            "?token=" + token +
-            "&lat=" + latitude +
-            "&lon=" + longitude +
-            "&speed=" + speed +
-            "&ping=1";
+            console.log("📍 Enviando GPS:", url);
 
-        console.log("📍 URL GPS:", url);
+            fetch(url).catch(e => console.error("Erro GPS:", e));
 
-        fetch(url).catch(function (e) {
-            console.error("Erro envio GPS:", e);
-        });
+            const statusEl = document.getElementById("statusGPS");
+            if (statusEl) statusEl.innerText = "📍 GPS ativo";
+        }
 
-        document.getElementById("statusGPS").innerText = "📍 GPS enviado";
+        setTimeout(loop, 10000);
     }
 
-    setTimeout(loop, 10000);
-}
-
-loop();
-
-
+    loop();
 }
 
 // ================= CORRIDA =================
 async function solicitarCorrida() {
 
+    console.log("🚕 Solicitar corrida");
 
-console.log("🚕 Solicitar corrida");
+    const origem = document.getElementById("origem").value;
+    const destino = document.getElementById("destino").value;
 
-const origem = document.getElementById("origem").value;
-const destino = document.getElementById("destino").value;
+    let distancia = 10;
+    let valor = distancia * 2.7;
+    if (valor < 10) valor = 10;
 
-let distancia = 10;
-let valor = distancia * 2.7;
+    try {
 
-if (valor < 10) valor = 10;
+        const payload = {
+            nome: "Usuário",
+            origem,
+            destino,
+            distancia_km: distancia,
+            valor_total: valor
+        };
 
-try {
+        console.log("Enviando corrida:", payload);
 
-    const payload = {
-        nome: "Usuário",
-        origem: origem,
-        destino: destino,
-        distancia_km: distancia,
-        valor_total: valor
-    };
+        const res = await fetch(URL_CORRIDA, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
 
-    console.log("Enviando corrida:", payload);
+        console.log("STATUS CORRIDA:", res.status);
 
-    const res = await fetch(URL_CORRIDA, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-    });
+        alert("Corrida solicitada!");
 
-    console.log("STATUS CORRIDA:", res.status);
-
-    alert("Corrida solicitada!");
-
-} catch (e) {
-    console.error("❌ ERRO CORRIDA:", e);
-    alert("Erro ao solicitar corrida");
-}
-
-
+    } catch (e) {
+        console.error("❌ ERRO CORRIDA:", e);
+        alert("Erro ao solicitar corrida");
+    }
 }
